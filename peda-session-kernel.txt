@@ -1,0 +1,9 @@
+break *0xf0421fce
+break *0xf0421a2e
+break * 0xf04216d3
+break *0xf04216d3
+break *0xf0421811
+break *0xf04219af
+break *0xf042312e
+break *0xf0423335
+
