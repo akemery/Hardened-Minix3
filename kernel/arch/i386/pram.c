@@ -292,7 +292,8 @@ void free_pram_mem_block_vaddr(struct proc *rp,
         (raddr - page_base) - 1)/(4*1024)  + 1;
    struct pram_mem_block *pmb ;
 #if H_DEBUG
-     printf("KERNEL FREEPMBS %d\n", rp->p_endpoint);
+     printf("KERNEL FREEPMBS %d %d 0x%lx %d\n", rp->p_endpoint,
+        n_pages_covered, raddr, len);
 #endif
    for(p = 0; p < n_pages_covered; p++){ 
      vaddr = page_base + p*4*1024;

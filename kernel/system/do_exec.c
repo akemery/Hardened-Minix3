@@ -45,8 +45,8 @@ int do_exec(struct proc * caller, message * m_ptr)
 
   /** Add by EKA: free the PE working set list ***/
     if(rp->p_hflags & PROC_TO_HARD){
-      //free_pram_mem_blocks(rp,FROM_EXEC);
-      set_exec_label(rp);
+      free_pram_mem_blocks(rp,FROM_EXEC);
+      //set_exec_label(rp);
     }
   /**End Add by EKA**/
 

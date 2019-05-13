@@ -572,7 +572,7 @@ static int map_subfree(struct vir_region *region,
         (vmp->vm_hflags & VM_PROC_TO_HARD) && 
            (vmp->vm_endpoint != NONE) && 
            (vmp->vm_endpoint != VM_PROC_NR))
-        if(free_region_pmbs(vmp, start, len)!=OK)
+        if(free_region_pmbs(vmp, start+region->vaddr, len)!=OK)
               panic("free_region_pmbs in vm");
    /* End added by EKA*/
    return OK;
