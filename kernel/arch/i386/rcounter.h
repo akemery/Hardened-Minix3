@@ -9,7 +9,7 @@
 #include <minix/com.h>
 #include <minix/portio.h>
 
-#define INS_2_EXEC 0x2EE0
+#define INS_2_EXEC 0x7270E00
 
 #define USE_INS_COUNTER        1
 #define INS_THRESHOLD 0xFFFFFFFF

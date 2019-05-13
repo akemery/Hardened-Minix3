@@ -32,4 +32,8 @@
 
 #define MCG_LMCE_P 	(1 << 27) // local machine check exception
 
+#define RIPV   (1 << 0)
+#define EIPV   (1 << 1)
+#define MCIP   (1 << 2)
+
 #endif /* MCA_H */

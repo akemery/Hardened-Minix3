@@ -132,15 +132,17 @@ struct proc {
   struct { reg_t r1, r2, r3; } p_defer;
 
    /*Add to extend the capacity of process to support hardening task*/
-  struct pram_mem_block *p_working_set; /*working set list*/
+  struct pram_mem_block *p_lus1_us2; /*working set list*/
   /**number of pages in the working set during first run**/
-  int p_first_step_workingset_id; 
-  /**number of pages in the working set during second run**/
-  int p_second_step_workingset_id;
+  int p_lus1_us2_size; 
+  int p_workingset_size;
   /**the hardening flags**/
   int p_hflags; 
 
   u64_t p_remaining_ins; /*remain instructions*/
+  u32_t p_ins_first;
+  u32_t p_ins_secnd;
+  u64_t p_ins_last;
   int p_start_count_ins; /**flags to start counting instruction**/
 
  /** List to store hardening event such as modification of US0 frames

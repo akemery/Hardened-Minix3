@@ -305,4 +305,10 @@ EXTERN struct hardening_shared_region *all_hsr_s;
 EXTERN struct hardening_shared_proc   *all_hsp_s;
 EXTERN int n_hsps;
 EXTERN int n_hsrs;
+
+EXTERN u32_t first_run_ins;
+EXTERN u32_t secnd_run_ins;
+EXTERN int h_exception; /* Used to tell exception handler to not handle exception*/
+EXTERN int nbpe;
+EXTERN int nbpe_f;
 #endif /* GLO_H */

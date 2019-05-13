@@ -32,9 +32,8 @@ struct vmproc {
 	u64_t		vm_major_page_fault;
 #if 1
   /*structure pour maintenir la liste des pages dans le working set*/
-  struct pram_mem_block *vm_working_set;
-  int vm_first_step_workingset_id;
-  int vm_second_step_workingset_id;
+  struct pram_mem_block *vm_lus1_us2;
+  int vm_lus1_us2_size;
   int vm_hflags; 
 #endif
 };

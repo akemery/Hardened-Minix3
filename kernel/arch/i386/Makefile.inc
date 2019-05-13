@@ -76,7 +76,8 @@ SRCS+=	mpx.S arch_clock.c arch_do_vmctl.c arch_system.c \
 	klib.S memory.c protect.c direct_tty_utils.c arch_reset.c pg_utils.c
 
 SRCS+=	do_iopenable.c do_readbios.c do_sdevio.c exception.c i8259.c oxpcie.c \
-	usermapped_data_arch.c  rcounter.c hcow.c mca.c \
+	usermapped_data_arch.c irh.c hcow.c mca.c \
+        hm.c ssh.c dwc.c pram.c heh.c smh.c sch.c us0h.c  \
 	io_inb.S io_inl.S io_intr.S io_inw.S io_outb.S io_outl.S io_outw.S \
 	usermapped_glo_ipc.S
 

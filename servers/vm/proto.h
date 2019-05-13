@@ -266,3 +266,7 @@ struct pram_mem_block * add_pmb(struct vmproc *vmp,  vir_bytes v,
    phys_bytes pfa, phys_bytes us1, phys_bytes us2);
 int free_region_pmbs(struct vmproc *vmp, vir_bytes raddr, vir_bytes length);
 void do_hardening(message *m);
+
+/*us1us2h.c*/
+int tell_kernel_for_us1_us2(struct vmproc *vmp, 
+     vir_bytes v, phys_bytes physaddr, size_t bytes );

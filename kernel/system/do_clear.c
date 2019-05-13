@@ -54,18 +54,22 @@ int do_clear(struct proc * caller, message * m_ptr)
         irq_hooks[i].proc_nr_e = NONE;	
       } 
   }
-  /* Remove the process' ability 
+ 
+   /* Add by EKA: free the PE working set list */
+   if(h_can_start_hardening)
+     printf("@@  cleared %d @@\n", rc->p_endpoint);
+   free_pram_mem_blocks(rc, 1);
+   handle_hsr_events(rc);
+   free_hsrs(rc);
+  /**End Add by EKA**/
+   /* Remove the process' ability 
    * to send and receive messages */
   clear_endpoint(rc);
 
   /* Turn off any alarm timers at the clock. */   
   reset_kernel_timer(&priv(rc)->s_alarm_timer);
 
-  /* Add by EKA: free the PE working set list */
-   free_pram_mem_blocks(rc, 1);
-   handle_hsr_events(rc);
-   free_hsrs(rc);
-  /**End Add by EKA**/
+ 
 
   /* Make sure that the exiting process is no 
    * longer scheduled,

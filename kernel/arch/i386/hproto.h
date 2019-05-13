@@ -6,17 +6,8 @@
 u32_t phys_get32(phys_bytes v);
 int phys_set32(phys_bytes addr, u32_t *v);
 void vm_setpt_root_to_ro(struct proc *p, u32_t *root);
-void save_copy_0(struct proc* p);
-void restore_copy_0(struct proc* p);
-void update_step(int step, int p_nr, const char *from);
-int cmp_reg(struct proc *p);
 void vm_reset_pram(struct proc *p, u32_t *root, int endcmp);
 void free_pram_mem_blocks(struct proc *current_p, int no_msg_to_vm);
-struct pram_mem_block * look_up_pte(struct proc *current_p, int pde, int pte);
-void save_copy_1(struct proc *p);
-void restore_copy_1(struct proc* p);
-void run_proc_2(struct proc *p);
-int cmp_mem(struct proc *p);
 void vm_resetmem_pt_root_to_ro(struct proc *p, u32_t *root);
 int cmp_frames(u32_t frame1, u32_t frame2);
 int cpy_frames(u32_t src, u32_t dst);
@@ -25,7 +16,6 @@ int sendmsg2vm(struct proc * pr);
 void free_pram_mem_block(struct proc *current_p, 
                        vir_bytes vaddr, u32_t *root);
 struct pram_mem_block * look_up_lastpf_pte(struct proc *current_p, int normal);
-void save_context(struct proc *p);
 int update_all_ws_us1_us2_data(struct proc *rp);
 int update_ws_us1_us2_data_vaddr(struct proc *rp, vir_bytes vaddr);
 int update_range_ws_us1_us2_data(struct proc *rp, vir_bytes offset,
@@ -52,7 +42,7 @@ int set_pe_mem_to_ro(struct proc *p, u32_t *root);
 void free_pram_mem_block_vaddr(struct proc *current_p, vir_bytes raddr, int len);
 
 /**rcounter.c**/
-int handle_ins_counter_over(void);
+int irh(void);
 void intel_arch_insn_counter_init(void);
 void intel_arch_insn_counter_reinit(void);
 void intel_fixed_insn_counter_init(void);
@@ -61,11 +51,45 @@ void update_ins_ctr_switch (void);
 void set_remain_ins_counter_value(struct proc *p);
 void get_remain_ins_counter_value(struct proc *p);
 void read_ins_64(u64_t* t);
+void reset_ins_params(struct proc *p);
+void get_remain_ins_counter_value_0(struct proc *p);
+void set_remain_ins_counter_value_0(struct proc *p);
+void set_remain_ins_counter_value_1(struct proc *p);
+void enable_counter(void);
+void reset_ins_params(struct proc *p);
+void reset_counter(void);
 /** mca.c**/
 int enables_all_mca_features(void);
 void enable_loggin_ofall_errors(void);
-int mca_mce_handler(void);
+int mcah(void);
 void enable_machine_check_exception(void);
 void clears_all_errors(void);
+
+/*hardening_manager.c*/
+void init_hardening(void);
+void start_dwc(struct proc *p);
+
+/*dwc.c*/
+void run_proc_2(struct proc *p);
+
+void enable_hme_event_in_procs(struct proc *p,  
+           vir_bytes vaddr, vir_bytes size );
+int look_up_page_in_hsr(struct proc *rp,
+           vir_bytes vaddr);
+int look_up_page_in_hsr(struct proc *rp, 
+           vir_bytes vaddr);
+void save_context(struct proc *p);
+void restore_for_stepping_first_run(struct proc *p);
+/*pram.c*/
+int check_vaddr_2(struct proc *p, u32_t *root, vir_bytes vaddr, int *rw);
+struct pram_mem_block *  look_up_pte(struct proc *current_p,
+     int pde, int pte);
+struct pram_mem_block *get_pmb(void);
+void set_fork_label(struct proc *p);
+void set_exec_label(struct proc *p);
+
+/*ssh.c*/
+void ssh_init(struct proc *p);
+int ssh(struct proc *p);
 
 #endif /* PROTO_H */

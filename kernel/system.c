@@ -151,7 +151,7 @@ void kernel_call(message *m_user, struct proc * caller)
        "!!!!! \n "
               "The system is in unstable state"
         " The guilty is %d\n", h_proc_nr);
-       return(OK);
+       return;
   }
   /*
    * the ldt and cr3 of the caller process is loaded because it just've trapped

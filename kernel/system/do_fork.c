@@ -163,6 +163,8 @@ int do_fork(struct proc * caller, message * m_ptr)
   rpc->p_seg.p_ttbr_v = NULL;
 #endif
 /*** Add by EKA**/
+  if(h_can_start_hardening)
+     printf("@@  forked %d @@ by %d @@@\n", rpc->p_endpoint, rpp->p_endpoint);
   rpc->p_setcow = 0; 
   rpc->p_hflags = 0;
   if(hprocs_in_use <= H_NPROCS_TO_START_H)
@@ -176,8 +178,8 @@ int do_fork(struct proc * caller, message * m_ptr)
       rpc->p_hflags |= PROC_TO_HARD;
       hc_proc_nr[(hcount++)%10] = rpc->p_nr;
   }
-  rpc->p_first_step_workingset_id = 0;
-  rpc->p_working_set = NULL;
+  rpc->p_lus1_us2_size = 0;
+  rpc->p_lus1_us2 = NULL;
   rpc->p_hardening_mem_events = NULL;
   rpc->p_nb_hardening_mem_events = 0;
   rpc->p_hardening_shared_regions = NULL;
@@ -186,7 +188,8 @@ int do_fork(struct proc * caller, message * m_ptr)
 #if H_DEBUG
      display_mem(rpp);
 #endif
-     free_pram_mem_blocks(rpp, 0);
+     set_fork_label(rpp);
+     //free_pram_mem_blocks(rpp, 0);
   }
 /** End Add by EKA**/
   return OK;

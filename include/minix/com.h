@@ -1197,8 +1197,8 @@
 #define HTASK_EN_HARDENING_PNAME    0x10
 #define HTASK_DIS_HARDENING_PNAME   0x20
 
-#define H_DEBUG                        0
-#define H_DEBUG_2                      0
+#define H_DEBUG                        1
+#define H_DEBUG_2                      1
 
 #define HADDREGIONTOWS_ENDPT	        m10_i4	/* process endpoint */
 #define HADDREGIONTOWS_RLENGTH	        m10_i3	/* region length */

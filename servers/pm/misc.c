@@ -496,3 +496,21 @@ int do_hardening(void){
   }
   return(OK);
 }
+
+
+int do_affichernbr()
+{
+   printf(" le pid des prossessus \n");
+  pid_t pid;
+ register struct mproc *rmp;
+
+
+    /* On fork() tant que l'erreur est EAGAIN */
+    
+
+    /* On retourne le PID du processus ainsi créé */
+  
+
+
+   return 1;
+}

@@ -9,6 +9,7 @@
 #include "apic_asm.h"
 #include "rcounter.h"
 #include "hproto.h"
+#include "htype.h"
 
 #define PMC_IRQ          230
 
@@ -70,10 +71,12 @@ void intel_fixed_insn_counter_init(void){
 
 void intel_fixed_insn_counter_reset(void){
     ia32_msr_write(INTEL_MSR_FIXED_CTR_CTRL, 0, 0);
+    ia32_msr_write(INTEL_FIXED_CTR0, 0, 0);
 }
 
 void intel_arch_insn_counter_reset(void){
    ia32_msr_write(INTEL_MSR_PERFMON_SEL1, 0, 0);
+   ia32_msr_write(INTEL_MSR_PERFMON_CRT1,0, 0);
 }
 
 
@@ -167,6 +170,7 @@ void set_remain_ins_counter_value_0(struct proc *p){
 /** Before starting one of the executions of the PE, this function
   ** initializes the retirement counter to
   ** (Overflow value - Maximum number of instruction of the PE) **/
+   u64_t ins;
 #if USE_FIX_CTR
    ia32_msr_write(INTEL_FIXED_CTR0, INS_THRESHOLD,
 	INS_THRESHOLD-ex64lo(INS_2_EXEC)+1);
@@ -175,15 +179,17 @@ void set_remain_ins_counter_value_0(struct proc *p){
 	INS_THRESHOLD-ex64lo(INS_2_EXEC)+1);
 #endif
          p->p_start_count_ins = 1;
+         read_ins_64(&ins);
+         p->p_ins_last = ins; 
          update_ins_ctr_switch ();
-         get_remain_ins_counter_value(p);
+         get_remain_ins_counter_value_0(p);
 }
 
 void set_remain_ins_counter_value_1(struct proc *p){
 /** Before resuming the PE after an interrupt or exception, this
   ** function updates the retirement counter to the value
   ** saved in p_remaining_ins**/
-
+#if 1
 #if USE_FIX_CTR
    ia32_msr_write(INTEL_FIXED_CTR0, ex64hi(p->p_remaining_ins),
                              ex64lo(p->p_remaining_ins));
@@ -191,8 +197,11 @@ void set_remain_ins_counter_value_1(struct proc *p){
    ia32_msr_write(INTEL_MSR_PERFMON_CRT1,
 		   ex64hi(p->p_remaining_ins), ex64lo(p->p_remaining_ins));
 #endif
+
    make_zero64(p->p_remaining_ins);
    update_ins_ctr_switch ();
+#endif
+
 }
 
 
@@ -205,11 +214,34 @@ void get_remain_ins_counter_value(struct proc *p){
    read_ins_64(&ins);
    *__ins_ctr_switch = ins;
    p->p_remaining_ins =ins;
+#if H_DEBUG
+   printf("remainning 0x%x  last_ins 0x%x\n",
+          ex64lo(p->p_remaining_ins), ex64lo(p->p_ins_last) );
+#endif
+#if 0
+   if(h_step==FIRST_RUN)
+     p->p_ins_first += (ex64lo(p->p_remaining_ins) - ex64lo(p->p_ins_last));
+   if(h_step==SECOND_RUN)
+     p->p_ins_secnd += (ex64lo(p->p_remaining_ins) - ex64lo(p->p_ins_last));
+#endif
+
+   p->p_ins_last = p->p_remaining_ins;
+}
+
+void get_remain_ins_counter_value_0(struct proc *p){
+/** The PE is stopped read the value of the retriement counter
+ ** Store that value in __ins_ctr_switch and p_remaining_ins
+ ** 2 storages to keep track of the remaining instructions of the PE **/
+   u64_t ins;
+   u64_t * __ins_ctr_switch = get_cpulocal_var_ptr(ins_ctr_switch);
+   read_ins_64(&ins);
+   *__ins_ctr_switch = ins;
+   p->p_remaining_ins =ins;
 }
 
 
 
-int handle_ins_counter_over(void){
+int irh(void){
 /** Handle the NMI:
  ** -- Clear the overflow flag
  ** -- Reinit the NMI
@@ -230,7 +262,26 @@ int handle_ins_counter_over(void){
       ia32_msr_write(INTEL_PERF_GLOBAL_OVF_CTRL, 0, INTEL_OVF_PMC0);
       intel_arch_insn_counter_reinit();
 #endif
+
+       if(h_step==FIRST_RUN)
+          first_run_ins = p->p_ins_last;
+       if(h_step==SECOND_RUN)
+          secnd_run_ins = p->p_ins_last;
+#if H_DEBUG
+       printf("ins_first 0x%x  ins_second 0x%x\n",
+          first_run_ins, secnd_run_ins );
+#endif
+       origin_syscall = PE_END_IN_NMI;
        return(OK);
    }
    return(EFAULT);
+}
+
+void reset_ins_params(struct proc *p){
+   make_zero64(p->p_ins_last);
+   make_zero64(p->p_remaining_ins);
+   if(h_step==FIRST_RUN)
+      p->p_ins_first = 0;
+   else
+      p->p_ins_secnd = 0;
 }

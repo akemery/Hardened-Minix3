@@ -83,7 +83,9 @@ struct hardening_shared_region{
 #define NO_HARD_RUN            0
 #define FIRST_RUN              1
 #define SECOND_RUN             2
-#define VM_RUN                 3       
+#define VM_RUN                 3
+#define FIRST_STEPPING         4
+#define H_STEPPING             4        
 #define H_YES                  1
 #define H_NO                   0
 #define VM_HANDLED_PF         -1
@@ -115,11 +117,14 @@ struct hardening_shared_region{
 #define RTS_STOP_4_PF    0x40000
 #define H_HAS_NULL_PRAM  0x80000
 #define H_TO_UPDATE     0x100000
+#define H_FORK          0x200000
+#define H_EXEC          0x400000
 #define NO_REGION_PAGE      0x10
 #define CPY_RAM_FIRST          0
 #define CPY_RAM_SECOND       0x1
 #define CPY_RAM_PRAM         0x2
 #define CMP_FAILED           0x3
+#define CPY_RAM_FIRST_STEPPING 0x8
 #define PROC_TO_HARD         0x2
 #define PROC_SHARING_MEM     0x4
 #define SHARED_ADDR   0xf100205c
@@ -132,6 +137,7 @@ struct hardening_shared_region{
 #define H_PAGE_FAULT           6
 #define REG_SIZE              32
 #define FROM_EXEC           0x10
+#define PE_END_IN_NMI          7
 #define I386_VM_ADDR_MASK_INV  0x00000FFF
 
 

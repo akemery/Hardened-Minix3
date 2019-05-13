@@ -70,7 +70,16 @@ void enable_machine_check_exception(void){
   write_cr4(cr4);
 }
 
-int mca_mce_handler(void){
-  printf("##### GOT MCA EXCEPTION  ###");
-  return(OK);
+int mcah(void){
+  int i;
+  u32_t low, high;
+  ia32_msr_read(IA32_MCG_STATUS,&high,&low);
+  if(low & MCIP){ /* ##### GOT MCA EXCEPTION  ###*/
+     printf("##### GOT MCA EXCEPTION  ###");
+     if(low & RIPV) /*PE can continue error was corrected*/
+       return(OK);   
+     /*PE can not continue error was not corrected*/ 
+     halt_cpu(); 
+  }
+  return(EFAULT);
 }

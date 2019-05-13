@@ -953,8 +953,8 @@ int map_proc_copy(struct vmproc *dst, struct vmproc *src)
 /* Copy all the memory regions from the src process to the dst process. */
 	region_init(&dst->vm_regions_avl);
         /*** Added by EKA ***/
-        dst->vm_first_step_workingset_id = 0;
-        free_pram_mem_blocks(src);
+        //dst->vm_lus1_us2_size = 0;
+        //free_pram_mem_blocks(src);
         /*** End Added by EKA ***/
 	return map_proc_copy_range(dst, src, NULL, NULL);
 }

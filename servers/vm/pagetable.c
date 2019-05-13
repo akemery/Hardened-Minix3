@@ -52,8 +52,6 @@ static int bigpage_ok = 1;
 /* Our process table entry. */
 struct vmproc *vmprocess = &vmproc[VM_PROC_NR];
 
-static int tell_kernel_for_us1_us2(struct vmproc *vmp, 
-                 vir_bytes v, phys_bytes physaddr, size_t bytes );
 
 /* Spare memory, ready to go after initialization, to avoid a
  * circular dependency on allocating memory and writing it into VM's
@@ -961,36 +959,7 @@ resume_exit:
 /*End added by EKA*/
    return ret;
 }
-static int tell_kernel_for_us1_us2(struct vmproc *vmp, 
-     vir_bytes v, phys_bytes physaddr, size_t bytes ){
-  int pages = bytes / VM_PAGE_SIZE, p;
-  phys_bytes us1, us1_cl, us2, us2_cl;
-  struct pram_mem_block *pmb;
-  for(p = 0; p < pages; p++) {
-    /*already in us1_us2 list?*/
-    if(!(pmb = look_up_pte(vmp, 
-       I386_VM_PDE(v),I386_VM_PTE(v) ))){ 
-      /* no allocate us1 and us2 and add it to us1_us2
-       * list */  
-      if((us1_cl = alloc_mem(1, PAF_CLEAR)) == NO_MEM)
-         panic("tell_kernel_for_us1_us2 :"
-           " no mem to allocate for copy-on-write\n");
-      us1 = CLICK2ABS(us1_cl);
-      if((us2_cl = alloc_mem(1, PAF_CLEAR)) == NO_MEM)
-         panic("tell_kernel_for_us1_us2 :"
-            " no mem to allocate for copy-on-write\n");
-      us2 = CLICK2ABS(us2_cl);
-      pmb = add_pmb(vmp,  v, physaddr, us1, us2);
-    }
-    else pmb->us0 = physaddr;/*yes update US0*/
-    if(sys_addregionto_ws(vmp->vm_endpoint, v, 1, 
-       pmb->us1, pmb->us2)!=OK)
-       return(EFAULT);
-    v += VM_PAGE_SIZE;
-    physaddr+=VM_PAGE_SIZE;
-  }
-  return(OK);
-}
+
 /*===========================================================================*
  *				pt_checkrange		     		     *
  *===========================================================================*/

@@ -122,14 +122,9 @@ void irq_handle(int irq)
 {
   irq_hook_t * hook;
 
-#if 0
-  if(h_unstable_state == H_UNSTABLE){
-       printf("ALERT ALERT FROM IRQ HANDLE !!!!! \n "
-              "The system is in unstable state The guilty is %d %d\n", 
-              h_proc_nr, irq);
-  }
-#endif
-
+  if(h_enable)
+     printf("int irq: %d nbpe: %d nbpe_f: %d proc: %d\n", 
+             irq, nbpe, nbpe_f, h_proc_nr);
   /* here we need not to get this IRQ until all the handlers had a say */
   assert(irq >= 0 && irq < NR_IRQ_VECTORS);
   hw_intr_mask(irq);

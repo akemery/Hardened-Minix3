@@ -132,51 +132,7 @@ void proc_init(void)
 	struct priv *sp;
 	int i;
 
-        int h_enable = 0;
-        int h_proc_nr = 0;
-        int h_do_sys_call = 0;
-        int h_do_nmi = 0;
-        int hprocs_in_use = 0;
-        int h_step = 0;
-        int h_step_back = 0;
-        int vm_should_run = 0;
-        int pe_should_run = 0;
-        int h_restore = 0;
-        int h_vm_end_h_req = 0;
-        int from_exec = 0;
-        int proc_2_delay = 0;
-        int h_unstable_state = 0;
-        int id_last_inject_pe   = 0;
-        int id_current_pe = 0;
-        int h_wait_vm_reply = H_NO;
-        vir_bytes pagefault_addr_1 = 0;
-        vir_bytes pagefault_addr_2 = 0;
-        struct hardening_shared_region *all_hsr_s = NULL;
-        struct hardening_shared_proc   *all_hsp_s = NULL;
-        h_can_start_hardening = 0;
-
-        struct pram_mem_block *pmb;
-        struct hardening_mem_event *hme;
-        struct hardening_shared_region *hsr;
-        struct hardening_shared_proc *hsp;
-        int n_hsps = 0;
-        int n_hsrs = 0;
         
-        u32_t cr0 = 0;
-        u32_t cr2 = 0;
-        u32_t cr3 = 0;
-        u32_t cr4 = 0;
-        u32_t cr0_1 = 0;
-        u32_t cr0_2 = 0;
-        u32_t cr2_1 = 0;
-        u32_t cr2_2 = 0;
-        u32_t cr3_1 = 0;
-        u32_t cr3_2 = 0;
-        u32_t cr4_1 = 0;
-        u32_t cr4_2 = 0;
-        for(i=0; i<10; i++)
-          hc_proc_nr[i] = 0;
-
 	/* Clear the process table. Announce each slot as empty and set up
 	 * mappings for proc_addr() and proc_nr() macros. Do the same for the
 	 * table with privilege structures for the system processes. 
@@ -189,9 +145,10 @@ void proc_init(void)
 		rp->p_scheduler = NULL;		/* no user space scheduler */
 		rp->p_priority = 0;		/* no priority */
 		rp->p_quantum_size_ms = 0;	/* no quantum size */
+                /*added by EKA*/
                 rp->p_hflags = 0;
                 rp->p_setcow = 0;
-
+                /*end added by EKA*/
 		/* arch-specific initialization */
 		arch_proc_reset(rp);
 	}
@@ -202,47 +159,6 @@ void proc_init(void)
 		sp->s_sig_mgr = NONE;		/* clear signal managers */
 		sp->s_bak_sig_mgr = NONE;
 	}
-
-        for(pmb = BEG_PRAM_MEM_BLOCK_ADDR; pmb < END_PRAM_MEM_BLOCK_ADDR; pmb++){
-             pmb->flags = PRAM_SLOT_FREE;
-             pmb->vaddr = 0;
-             pmb->id = 0;
-             pmb->us0 = 0;
-             pmb->us1 = 0;
-             pmb->us2 = 0;
-             pmb->next_pmb = NULL;
-        }
-
-        for(hme = BEG_HARDENING_MEM_EVENTS_ADDR; 
-                    hme < END_HARDENING_MEM_EVENTS_ADDR; hme++){
-             hme->flags = HME_SLOT_FREE;
-             hme->addr_base = 0;
-             hme->nbytes = 0;
-             hme->id = 0;
-             hme->npages = 0;
-             hme->next_hme = NULL;
-        }
-
-        for(hsr = BEG_HARDENING_SHARED_REGIONS_ADDR; 
-                    hsr < END_HARDENING_SHARED_REGIONS_ADDR; hsr++){
-            hsr->id = 0;
-            hsr->flags = HSR_SLOT_FREE;
-            hsr->r_id = 0;
-            hsr->vaddr = 0;
-            hsr->length = 0;
-            hsr->next_hsr = NULL;
-            hsr->r_hsp = NULL;   
-            hsr->n_hsp = 0;
-        }
-
-        for(hsp = BEG_HARDENING_SHARED_PROCS_ADDR; 
-                    hsp < END_HARDENING_SHARED_PROCS_ADDR; hsp++){
-            hsp->hsp_endpoint = 0;
-            hsp->flags = HSP_SLOT_FREE;
-            hsp->id = 0;
-            hsp->next_hsp = NULL;
-       }
-        
 	idle_priv.s_flags = IDL_F;
 	/* initialize IDLE structures for every CPU */
 	for (i = 0; i < CONFIG_MAX_CPUS; i++) {
@@ -253,6 +169,7 @@ void proc_init(void)
 		ip->p_rts_flags |= RTS_PROC_STOP;
 		set_idle_name(ip->p_name, i);
 	}
+        init_hardening();
 }
 
 static void switch_address_space_idle(void)

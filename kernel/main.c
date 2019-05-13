@@ -39,7 +39,7 @@ char *** _penviron;
 
 /* Prototype declarations for PRIVATE functions. */
 static void announce(void);
-static void init_hardening_features(void);
+
 
 void bsp_finish_booting(void)
 {
@@ -64,7 +64,7 @@ void bsp_finish_booting(void)
   announce();				/* print MINIX startup banner */
 
   /**Added by EKA: INIT retirement counter and MCA/MCE**/
-  init_hardening_features();
+  //init_hardening_features();
 
   /*
    * we have access to the cpu local run queue, only now schedule the processes.
@@ -337,25 +337,6 @@ void kmain(kinfo_t *local_cbi)
 }
 
 
-static void init_hardening_features(void){
-  /** Added by EKA**/
-#if USE_MCA
-   enables_all_mca_features();
-   enable_loggin_ofall_errors();
-   clears_all_errors();
-   enable_machine_check_exception();
-#endif
-
-#if USE_INS_COUNTER
-#if USE_FIX_CTR
-	intel_fixed_insn_counter_init();
-#else
-	intel_arch_insn_counter_init();
-#endif
-#endif
-/** Ende Added by EKA**/ 
- 
-}
 /*===========================================================================*
  *				announce				     *
  *===========================================================================*/

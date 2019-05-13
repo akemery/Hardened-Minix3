@@ -477,14 +477,19 @@ void init_vm(void)
 	/* Set table to 0. This invalidates all slots (clear VMF_INUSE). */
 	memset(vmproc, 0, sizeof(vmproc));
     
+        /*Added by EKA*/
         int hardening_enabled = 0;
+         /*End added by EKA*/
 
 	for(i = 0; i < ELEMENTS(vmproc); i++) {
 		vmproc[i].vm_slot = i;
+                /*Added by EKA*/
                 vmproc[i].vm_hflags = 0;
-                vmproc[i].vm_first_step_workingset_id = 0;
-                vmproc[i].vm_working_set = NULL;
+                vmproc[i].vm_lus1_us2_size = 0;
+                vmproc[i].vm_lus1_us2 = NULL;
+                /*End added by EKA*/
 	}
+        /*Added by EKA*/
         /**Initialize the hardening copy-on-write data structure table**/
         for(pmb = BEG_PRAM_MEM_BLOCK_ADDR;pmb < END_PRAM_MEM_BLOCK_ADDR; pmb++){
              pmb->flags = PRAM_SLOT_FREE;
@@ -494,7 +499,7 @@ void init_vm(void)
              pmb->us2 = 0;
  
         }
-
+         /*End added by EKA*/
 	/* Initialize ACL data structures. */
 	acl_init();
 
