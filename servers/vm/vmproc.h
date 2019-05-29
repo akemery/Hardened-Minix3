@@ -30,12 +30,12 @@ struct vmproc {
 	vir_bytes	vm_total_max;
 	u64_t		vm_minor_page_fault;
 	u64_t		vm_major_page_fault;
-#if 1
+   /* Added by EKA*/
   /*structure pour maintenir la liste des pages dans le working set*/
   struct pram_mem_block *vm_lus1_us2;
   int vm_lus1_us2_size;
   int vm_hflags; 
-#endif
+  /* End Added by EKA*/
 };
 
 /* Bits for vm_flags */

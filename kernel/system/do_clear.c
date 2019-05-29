@@ -56,11 +56,13 @@ int do_clear(struct proc * caller, message * m_ptr)
   }
  
    /* Add by EKA: free the PE working set list */
-   if(h_can_start_hardening)
-     printf("@@  cleared %d @@\n", rc->p_endpoint);
    free_pram_mem_blocks(rc, 1);
    handle_hsr_events(rc);
    free_hsrs(rc);
+   reset_hardening_attri(rc);
+   printf("### clearing proc: %s %d ticks: %d user: %d sys: %d####\n", 
+         rc->p_name, rc->p_endpoint, rc->p_ticks, 
+         rc->p_user_time, rc->p_sys_time);
   /**End Add by EKA**/
    /* Remove the process' ability 
    * to send and receive messages */

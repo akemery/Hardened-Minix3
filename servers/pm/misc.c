@@ -492,25 +492,12 @@ int do_hardening(void){
           sys_hardening(PM_PROC_NR, 
                         HTASK_DIS_HARDENING_PID, 
                         m_in.HTASK_P_ENDPT, NULL,0);
+     case HTASK_DISPLAY_HARDENIG:
+           sys_hardening(PM_PROC_NR, 
+              HTASK_DISPLAY_HARDENIG , 0, NULL,0);
           break;
   }
   return(OK);
 }
 
 
-int do_affichernbr()
-{
-   printf(" le pid des prossessus \n");
-  pid_t pid;
- register struct mproc *rmp;
-
-
-    /* On fork() tant que l'erreur est EAGAIN */
-    
-
-    /* On retourne le PID du processus ainsi créé */
-  
-
-
-   return 1;
-}

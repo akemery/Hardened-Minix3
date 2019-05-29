@@ -5,7 +5,7 @@
 
 #include "acpi_globals.h"
 
-#define PCI_MAX_DEVICES	32
+#define PCI_MAX_DEVICES	64
 #define PCI_MAX_PINS	4
 
 #define IRQ_TABLE_ENTRIES	(PCI_MAX_DEVICES * PCI_MAX_PINS)

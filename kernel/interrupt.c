@@ -121,10 +121,10 @@ void rm_irq_handler( const irq_hook_t* hook ) {
 void irq_handle(int irq)
 {
   irq_hook_t * hook;
-
-  if(h_enable)
-     printf("int irq: %d nbpe: %d nbpe_f: %d proc: %d\n", 
-             irq, nbpe, nbpe_f, h_proc_nr);
+  if(h_unstable_state == H_UNSTABLE){
+    nb_interrupt++;
+    return;
+  }
   /* here we need not to get this IRQ until all the handlers had a say */
   assert(irq >= 0 && irq < NR_IRQ_VECTORS);
   hw_intr_mask(irq);

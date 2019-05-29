@@ -69,8 +69,6 @@ int do_exec(struct proc * caller, message * m_ptr)
 
   /* No reply to EXEC call */
   RTS_UNSET(rp, RTS_RECEIVING);
-  if(h_can_start_hardening)
-     printf("@@  exced %d @@\n", rp->p_endpoint);
   /* Mark fpu_regs contents as not significant, so fpu
    * will be initialized, when it's used next time. */
   rp->p_misc_flags &= ~MF_FPU_INITIALIZED;

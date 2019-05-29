@@ -571,7 +571,9 @@ void arch_proc_setcontext(struct proc *p, struct stackframe_s *state,
 
 void restore_user_context(struct proc *p)
 {
+  /*Added by EKA*/
   start_dwc(p);
+  /* End added by EKA*/
   int trap_style = p->p_seg.p_kern_trap_style;
   p->p_seg.p_kern_trap_style = KTS_NONE;
   if(trap_style == KTS_SYSENTER) {

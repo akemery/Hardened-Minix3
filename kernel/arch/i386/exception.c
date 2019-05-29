@@ -239,31 +239,38 @@ struct exception_frame * frame)
   saved_proc = get_cpulocal_var(proc_ptr);
   
   ep = &ex_data[frame->vector];
-
+/* Added by EKA*/
   if(h_unstable_state == H_UNSTABLE){
        switch(frame->vector){
             case PAGE_FAULT_VECTOR:
                  /** It is like a bad page fault
                   ** Put the CPU in a stable state
                   ** Return from the exception **/
-                 printf("ALERT ALERT FROM EXCEPTION "
-                      "HANDLER !!!!! \n "
-                     "The system is in unstable state"
-                      " the guilty is %d %d\n"
-                       "A PAGE_FAULT OCCUR\n", 
-                       h_proc_nr, frame->vector);
+                 nb_pages_fault++;
                  break;
             default: 
-                 printf("ALERT ALERT FROM EXCEPTION"
-                        " HANDLER !!!!! \n "
-                       "The system is in unstable "
-                       "state the guilty is %d %d\n"
-                       "OTHER EXCEPTION OCCUR\n", 
-                       h_proc_nr, frame->vector);
+                 nb_exception++;
                  break;
        }
        return;
   }
+  
+  if(h_unstable_state == H_STEPPING){
+#if H_DEBUG
+       printf("got spurious DEBUG\n");
+#endif
+       frame->eflags &= ~TRACEBIT;
+       return;
+  }
+
+  if(h_exception){
+#if H_DEBUG
+     printf("got spurious exception\n");
+#endif
+     h_exception = 0;
+     return;
+  }
+/* end Added by EKA*/
 
   /* spurious NMI on some machines */
   if (frame->vector == 2) {		

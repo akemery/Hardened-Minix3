@@ -163,8 +163,6 @@ int do_fork(struct proc * caller, message * m_ptr)
   rpc->p_seg.p_ttbr_v = NULL;
 #endif
 /*** Add by EKA**/
-  if(h_can_start_hardening)
-     printf("@@  forked %d @@ by %d @@@\n", rpc->p_endpoint, rpp->p_endpoint);
   rpc->p_setcow = 0; 
   rpc->p_hflags = 0;
   if(hprocs_in_use <= H_NPROCS_TO_START_H)
@@ -173,7 +171,9 @@ int do_fork(struct proc * caller, message * m_ptr)
   if(hprocs_in_use > 800){
       rpc->p_setcow = 1; 
   }
-     
+  
+  rpc->p_ticks = 0;
+   
   if(h_can_start_hardening){
       rpc->p_hflags |= PROC_TO_HARD;
       hc_proc_nr[(hcount++)%10] = rpc->p_nr;

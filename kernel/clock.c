@@ -120,6 +120,7 @@ int timer_int_handler(void)
 	billp = get_cpulocal_var(bill_ptr);
 
 	p->p_user_time++;
+        p->p_ticks++;
 
 	if (! (priv(p)->s_flags & BILLABLE)) {
 		billp->p_sys_time++;

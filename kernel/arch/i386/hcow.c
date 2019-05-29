@@ -44,6 +44,8 @@
 static void vm_resetmem(struct proc *p, u32_t *pagetable, const u32_t v);
 static int deadlock(int function, register struct proc *cp, endpoint_t src_dst_e);
 static void restore_cr_reg(void);
+static void print_rdyqueue(void);
+static void print_ipc(struct proc *p);
 
 /*===========================================================================*
  *				deadlock				     * 
@@ -121,7 +123,7 @@ int sendmsg2vm(struct proc * pr){
      message m;
      int err;
      m.m_source = pr->p_endpoint;
-     m.m_type   = VM_HCONFMEM;
+    // m.m_type   = VM_HCONFMEM;
      /* Check for a possible deadlock before actually blocking. */
      if (deadlock(SEND, pr, VM_PROC_NR)) {
                 hmini_receive(pr, VM_PROC_NR, 
@@ -295,4 +297,80 @@ static void restore_cr_reg(void){
   write_cr0(cr0);
   write_cr3(cr3);
   write_cr4(cr4);
+}
+
+void display_hardened_proc(void){
+   struct proc *rp;
+   for (rp = BEG_PROC_ADDR; rp < END_PROC_ADDR; ++rp) {
+       if(rp->p_hflags & PROC_TO_HARD)
+           print_proc(rp);		
+  }
+  print_rdyqueue();
+}
+
+void reset_hardening_attri(struct proc *p){
+   p->p_hflags = 0;
+   p->p_lus1_us2 = NULL;
+   p->p_lus1_us2_size = 0; 
+   p->p_workingset_size = 0;
+   p->p_remaining_ins = 0; /*remain instructions*/
+   p->p_ins_first = 0;
+   p->p_ins_secnd = 0;
+   p->p_ins_last = 0;
+   p->p_start_count_ins = 0;
+   p->p_hardening_mem_events = NULL;
+   p->p_nb_hardening_mem_events = 0;
+   p->p_hardening_shared_regions = NULL;
+   p->p_nb_hardening_shared_regions = 0;
+}
+
+static void print_rdyqueue(void){
+  int q,i;
+  register struct proc *rp;			
+  struct proc **rdy_head;
+  rdy_head = get_cpulocal_var(run_q_head);
+  printf("#### PRINTING READY QUEUE ######\n\n");
+  for (q=0; q < NR_SCHED_QUEUES; q++) { 
+     if(!(rp = rdy_head[q])) 
+       continue; 
+     printf("h_enable %d queue %d proc %d name %s hproc %d\n"
+                     ,h_enable, q, rp->p_nr, rp->p_name, h_proc_nr);
+  }
+  for(i=0; i<10; i++){
+     if(hc_proc_nr[i]){
+           if(proc_addr(hc_proc_nr[i])->p_rts_flags == 1) continue;
+           printf("@@@@@@ hproc: %s %d %d  sendto %d getfrom %d vm %d vfs %d pm %d"
+                   "vm_sendto %d vmgetfrom %d pmsento %d pmgetfrom %d"
+                   "vfssento %d vfsgetfrom %d %d\n", 
+              proc_addr(hc_proc_nr[i])->p_name, proc_addr(hc_proc_nr[i])->p_nr, 
+              proc_addr(hc_proc_nr[i])->p_rts_flags,
+              proc_addr(hc_proc_nr[i])->p_sendto_e,
+              proc_addr(hc_proc_nr[i])->p_getfrom_e,
+              proc_addr(VM_PROC_NR)->p_rts_flags,
+              proc_addr(VFS_PROC_NR)->p_rts_flags,
+              proc_addr(PM_PROC_NR)->p_rts_flags,
+              proc_addr(VM_PROC_NR)->p_sendto_e,
+              proc_addr(VM_PROC_NR)->p_getfrom_e,
+              proc_addr(PM_PROC_NR)->p_sendto_e,
+              proc_addr(PM_PROC_NR)->p_getfrom_e,
+              proc_addr(VFS_PROC_NR)->p_sendto_e,
+              proc_addr(VFS_PROC_NR)->p_getfrom_e,i);
+              print_ipc(proc_addr(hc_proc_nr[i]));
+              print_ipc(proc_addr(VM_PROC_NR));
+              print_ipc(proc_addr(PM_PROC_NR));
+              print_ipc(proc_addr(VFS_PROC_NR));
+         
+      }
+  }
+  return;
+}
+
+static void print_ipc(struct proc *p){
+     struct proc *q =  p->p_caller_q;
+     printf("### Queue of %s\n", p->p_name);
+     while(q){
+        printf("@@@@@@ proc: %s %d %d  sendto %d getfrom %d\n",
+          q->p_name, q->p_nr, q->p_rts_flags, q->p_sendto_e, q->p_getfrom_e);
+        q = q->p_q_link;
+     }
 }

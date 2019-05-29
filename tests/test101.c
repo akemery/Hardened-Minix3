@@ -17,6 +17,15 @@
 #define ITER       50
 int main(void){
    int fd1 = open("2a.mp4", 2);
+    fd1 = open("1.mp4", 2);
+    fd1 = open("2.mp4", 2);
+    fd1 = open("3.mp4", 2);
+    fd1 = open("4.mp4", 2);
+    fd1 = open("5.mp4", 2);
+    fd1 = open("6.mp4", 2);
+    fd1 = open("7.mp4", 2);
+    fd1 = open("8.mp4", 2);
+    fd1 = open("9.mp4", 2);
    if(fd1 < 0){
      perror("Can't open file\n");
      exit(-1);

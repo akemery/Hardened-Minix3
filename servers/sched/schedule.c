@@ -322,7 +322,6 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		printf("PM: An error occurred when trying to schedule %d: %d\n",
 		rmp->endpoint, err);
 	}
-
 	return err;
 }
 

@@ -152,7 +152,8 @@ int main(void)
         if((msg.m_type == VM_TELL_VM_H_ENABLE)|| 
              (msg.m_type == VM_TELL_VM_H_DISABLE) || 
              (msg.m_type == VM_TELL_VM_H_ENABLE_P) ||
-              (msg.m_type == VM_TELL_VM_H_DISABLE_P)){
+             (msg.m_type == VM_TELL_VM_H_DISABLE_P) ||
+             (msg.m_type == VM_TELL_VM_H_ENABLE_PRIV_P) ){
              do_hardening(&msg);
              continue;
         }

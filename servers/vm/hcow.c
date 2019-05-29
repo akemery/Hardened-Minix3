@@ -50,5 +50,9 @@ void do_hardening(message *m)
      case VM_TELL_VM_H_DISABLE_P:
           vmp->vm_hflags &= ~VM_PROC_TO_HARD;
           break;
+     case VM_TELL_VM_H_ENABLE_PRIV_P:
+          vmp->vm_hflags |= VM_PROC_TO_HARD;
+          allocate_all_us1_us2_for_proc(vmp);
+          break;
   }
 }

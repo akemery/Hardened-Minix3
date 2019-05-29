@@ -180,7 +180,7 @@ EXTERN u32_t p_cr3_v_2;
 EXTERN struct stackframe_s p_reg_back;	
 EXTERN struct segframe p_seg_back;	
 EXTERN  char p_priority_back;		
-EXTERN u64_t p_cpu_time_left_back;	
+EXTERN u64_t p_cpu_time_left;	
 EXTERN unsigned p_quantum_size_ms_back;	
 EXTERN u64_t p_cycles_back;		
 EXTERN u64_t p_kcall_cycles_back;		
@@ -311,4 +311,10 @@ EXTERN u32_t secnd_run_ins;
 EXTERN int h_exception; /* Used to tell exception handler to not handle exception*/
 EXTERN int nbpe;
 EXTERN int nbpe_f;
+EXTERN int nb_injected_faults;
+EXTERN int nb_pages_fault;
+EXTERN int nb_exception;
+EXTERN int nb_kcall;
+EXTERN int nb_scall;
+EXTERN int nb_interrupt;
 #endif /* GLO_H */

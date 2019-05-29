@@ -51,7 +51,7 @@ void hardening_exception_handler(
      *     - A pagefault occur
      * In all others cases the PE is stopped
      */
-#if INJECT_FAULT
+#if INJECT_FAULT__
    restore_cr_reg();
 #endif
    /**This function should be called 
@@ -63,17 +63,25 @@ void hardening_exception_handler(
     * be a hardened process**/
    assert(h_proc_nr == p->p_nr);
    assert(h_proc_nr != VM_PROC_NR);
+   get_remain_ins_counter_value(p);
    h_stop_pe = H_YES;
+#if H_DEBUG
+   printf("#### GOT EXCEPTION HAHAHA %d %d %d %d ####", 
+            h_step,h_proc_nr,p->p_nr, frame->vector);
+#endif
    switch(frame->vector){
       case DIVIDE_VECTOR :
            break;
       case DEBUG_VECTOR :
-           ssh(p);
+           if(ssh(p)!=OK)
+               h_stop_pe = H_NO;
            break;
       case NMI_VECTOR :
+#if H_DEBUG
            printf("#### GOT NMI HAHAHA %d %d %d####", 
             h_step,h_proc_nr,p->p_nr);
-           if(irh()!=OK);
+#endif
+           if(irh()!=OK)
              h_stop_pe = H_NO;   
            break;
       case BREAKPOINT_VECTOR:

@@ -96,6 +96,12 @@ void init_hardening(void){
   int h_exception = 0;
   int nbpe = 0;
   int nbpe_f = 0;
+  int nb_injected_faults;
+  int nb_pages_fault;
+  int nb_exception;
+  int nb_kcall;
+  int nb_scall;
+  int nb_interrupt;
   for(i=0; i<10; i++)
     hc_proc_nr[i] = 0;
   for(pmb = BEG_PRAM_MEM_BLOCK_ADDR;
@@ -138,5 +144,5 @@ void init_hardening(void){
             hsp->id = 0;
             hsp->next_hsp = NULL;
        }
-
+  init_hardening_features();
 }

@@ -61,7 +61,10 @@ int do_hardening(struct proc * caller,
           hp = proc_addr(hproc_nr);
           hp->p_hflags |= PROC_TO_HARD;
           hm.m_source = hp->p_endpoint;
-          hm.m_type   = VM_TELL_VM_H_ENABLE_P;
+          if (priv(hp)->s_flags & SYS_PROC) 
+             hm.m_type   = VM_TELL_VM_H_ENABLE_PRIV_P;
+          else
+             hm.m_type   = VM_TELL_VM_H_ENABLE_P;
           if ((err = mini_send(hp, VM_PROC_NR,
 			&hm, FROM_KERNEL))) {
 		panic("WARNING: enable_hardening:"
@@ -81,6 +84,9 @@ int do_hardening(struct proc * caller,
 		panic("WARNING: disable_hardening:"
                  " mini_send returned %d\n", err);
           }
+     case HTASK_DISPLAY_HARDENIG:
+          //if(h_can_start_hardening == ENABLE_HARDENING)
+          display_hardened_proc();
           break;
   }
   return(OK);

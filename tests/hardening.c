@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include "hardening.h"
 #include <string.h> 
+#include <stdio.h>
 static void usage(char *prog_name);
 int main(int argc, char *argv[]){
    int r = OK;
@@ -73,6 +74,12 @@ int main(int argc, char *argv[]){
                      pid, NULL, 0))!=OK)
              printf("Disable hardening for %d"
                      " procs failed %d\n", pid, r);
+          break;
+     case HTASK_DISPLAY_HARDENIG:
+          if((r = hardening(HTASK_DISPLAY_HARDENIG,
+                  PID_NONE, NULL, 0))!=OK)
+             printf("Displaying hardened"
+                       " procs failed %d\n", r);
           break;
      default:
           usage(argv[0]);

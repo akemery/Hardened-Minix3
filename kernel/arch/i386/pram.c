@@ -77,7 +77,8 @@ int check_vaddr_2(struct proc *p,
    static int cnpf = 0;
    struct pram_mem_block *pmb, *next_pmb;
    assert((h_step == FIRST_RUN) || 
-        (h_step == SECOND_RUN));
+        (h_step == SECOND_RUN) || 
+        (h_step == FIRST_STEPPING));
    /* read the pde entry and the 
     * pte entry of the PF page */
    pde = I386_VM_PDE(vaddr);
@@ -387,8 +388,6 @@ void vm_reset_pram(struct proc *p,
     *
     */
    assert(p->p_nr != VM_PROC_NR);
-   assert((h_step == FIRST_RUN) || 
-         (h_step == SECOND_RUN));
    if(p->p_lus1_us2_size <= 0)
       return;
    struct pram_mem_block *pmb = p->p_lus1_us2;
@@ -430,6 +429,36 @@ void vm_reset_pram(struct proc *p,
 #endif
    /** Read the frame address**/
    u32_t pfa = I386_VM_PFA(pte_v);
+
+   if(endcmp == ABORT_PE){
+       pmb->flags &= ~IWS_PF_SECOND;  
+       pmb->flags &= ~IWS_PF_FIRST;
+       pmb->flags &= ~HGET_PF;
+       pmb->flags &= ~IWS_MOD_KERNEL;
+       if(((pmb->us1!=MAP_NONE) || 
+            (pmb->us2!=MAP_NONE)) &&
+            (pmb->us0!=MAP_NONE)){
+        if(pmb->us1!=MAP_NONE){
+           if(cpy_frames(pmb->us0, pmb->us1)!=OK)
+               panic("Copy second_phys to"
+                           " us0 failed\n"); 
+        }
+        if(pmb->us2!=MAP_NONE){
+           if(cpy_frames(pmb->us0, pmb->us2)!=OK)
+                panic("Copy second_phys"
+                       " to us0 failed\n"); 
+         }
+         pte_v = 
+             (pte_v & I386_VM_ADDR_MASK_INV) | 
+                        I386_VM_WRITE | pmb->us0;
+         if(phys_set32((u32_t) (pte_a + pte), 
+                     &pte_v)!=OK)
+                 panic("Updating page table from "
+                      "second_phy to us0" "failed\n");
+      }
+      pmb = pmb->next_pmb;
+      continue;
+   }
 
    if((h_step == FIRST_RUN) && 
        (endcmp == CPY_RAM_FIRST)){
@@ -618,6 +647,18 @@ void vm_reset_pram(struct proc *p,
                       "second_phy to us0" "failed\n");
              }
              break;
+          case CPY_RAM_FIRST_STEPPING :
+             if(pmb->us1!=MAP_NONE){
+               if(pmb->flags & IWS_PF_FIRST)
+                  pte_v = (pte_v & I386_VM_ADDR_MASK_INV) | 
+                        I386_VM_WRITE | pmb->us1;
+               else
+                  pte_v = (pte_v & I386_VM_ADDR_MASK_INV) | pmb->us1;
+               if(phys_set32((u32_t) (pte_a + pte), &pte_v)!=OK)
+                    panic("Updating page table from second_phy to pram_phys"
+                          "failed\n");
+             }
+             break;
           default :
              /**TO COMPLETE**/
              panic("Should never happen");
@@ -776,10 +817,6 @@ int add_region_to_ws(struct proc *p, u32_t *root,
       if(pmb->flags & H_FORK){
           pmb->flags = pmb->iflags;
           pmb->flags &= ~H_FORK;
-          printf("FORK  %d vaddr 0x%lx  "
-            "pram 0x%lx first 0x%lx second: 0x%lx %d\n", 
-                 p->p_nr, pmb->vaddr, pmb->us0, 
-                 pmb->us1, pmb->us2, pmb->flags);
       }
 
         if(pmb->flags & H_EXEC){

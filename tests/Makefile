@@ -81,7 +81,9 @@ MINIX_TESTS= \
 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 \
 101
 
-FILES += t84_h_nonexec.sh 2a.mp4 2aa.mp4
+FILES += t84_h_nonexec.sh 2a.mp4 1.mp4 2.mp4 3.mp4 4.mp4 5.mp4 6.mp4 7.mp4 \
+         8.mp4 9.mp4 10.mp4 11.mp4 12.mp4 13.mp4 14.mp4 15.mp4 16.mp4 \
+         17.mp4 18.mp4 19.mp4 20.mp4
 
 .if ${MACHINE_ARCH} == "i386"
 MINIX_TESTS+= \

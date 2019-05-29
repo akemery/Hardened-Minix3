@@ -37,7 +37,7 @@ static void save_copy_2(struct proc *p);
 static int cmp_mem(struct proc *p);
 static int cmp_reg(struct proc *p);
 static void save_copy_1(struct proc *p);
-
+void static reset_hardened_run(struct proc *p);
 void start_dwc(struct proc *p){
    /* Added by EKA*/
 	
@@ -89,13 +89,12 @@ void start_dwc(struct proc *p){
            h_enable = H_ENABLE;
 #if INJECT_FAULT
       if(could_inject == H_YES){
-                printf("WARNING ERROR "
-           "INJECTED DURING 1ST RUN\n");
 #if 0
            inject_error_in_all_cr(p);
 #endif
            inject_error_in_gpregs(p);
            could_inject = H_NO;
+           nb_injected_faults++;
        }
 #endif
   }
@@ -145,17 +144,20 @@ void start_dwc(struct proc *p){
     //vm_setpt_root_to_ro(p, (u32_t *)p->p_seg.p_cr3);
      set_pe_mem_to_ro(p, (u32_t *)p->p_seg.p_cr3);
      h_restore = 0;
+#if USE_INS_COUNTER
+        /* initialize retirement counter */
+	set_remain_ins_counter_value_0(p);
+#endif
      /* be sure the process remain runnable*/
      assert(proc_is_runnable(p)); 
 #if INJECT_FAULT 
     if(could_inject == H_YES){
-      printf("WARNING ERROR INJECTED "
-             "DURING 2ND RUN\n");
 #if 0
         inject_error_in_all_cr(p);
 #endif
         inject_error_in_gpregs(p);
         could_inject = H_NO;
+        nb_injected_faults++;
       }
 #endif
   }
@@ -220,13 +222,14 @@ void hardening_task(void){
      * The running process should not be the VM
      * The hardening should be enable
      */
-#if INJECT_FAULT
+#if INJECT_FAULT__
     restore_cr_reg();
 #endif
     assert(h_enable);
     struct proc  *p = get_cpulocal_var(proc_ptr);
     assert(h_proc_nr == p->p_nr);
     assert(h_proc_nr != VM_PROC_NR);
+    get_remain_ins_counter_value(p);
     /* Should only be called during 1st or 2nd run */
     assert((h_step == FIRST_RUN) || 
        (h_step == SECOND_RUN)); 
@@ -293,7 +296,20 @@ void hardening_task(void){
        vm_reset_pram(p,(u32_t *)p->p_seg.p_cr3,
                CPY_RAM_PRAM);
 
-      /* reset of hardening global variables */
+       reset_hardened_run(p);
+       return;
+   }
+   else{
+      panic("UNKOWN HARDENING STEP %d\n", h_step);
+   }
+      
+}
+
+
+void static reset_hardened_run(struct proc *p){
+   if(origin_syscall == PE_END_IN_NMI) 
+           h_exception = 1; /* tell the excception handler to return*/
+   /* reset of hardening global variables */
        h_enable = 0;
        h_proc_nr = 0;
        h_step_back = 0;
@@ -317,19 +333,13 @@ void hardening_task(void){
        pagefault_addr_1 = 0;
        pagefault_addr_2 = 0;
        nbpe++;
-#if H_DEBUG_2
-       printf("PE OK #ws: %d #us1_us2: %d nbpe: %d\n",
+#if H_DEBUG_3
+       printf("PE OK #ws: %d #us1_us2: %d nbpe: %d ticks %d\n",
             p->p_workingset_size,
-                       p->p_lus1_us2_size, nbpe);
+                       p->p_lus1_us2_size, nbpe, p->p_ticks);
 #endif
-       return;
-   }
-   else{
-      panic("UNKOWN HARDENING STEP %d\n", h_step);
-   }
-      
-}
 
+}
 /*===============================================*
  *				cmp_mem          *
  *===============================================*/
@@ -586,6 +596,7 @@ static void save_copy_0(struct proc* p){
    p_kern_trap_style = 
        (int) p->p_seg.p_kern_trap_style;
    p_rts_flags = p->p_rts_flags;
+   p_cpu_time_left = p->p_cpu_time_left;
    cr0 = read_cr0();
    cr2 = read_cr2();
    cr3 = read_cr3();
@@ -611,6 +622,7 @@ static void restore_copy_0(struct proc* p){
    p->p_reg.pc = (reg_t)pc;
    p->p_reg.cs = (reg_t)cs;
    p->p_reg.ss = (reg_t)ss;
+   p->p_cpu_time_left = p_cpu_time_left;
    p->p_reg.retreg = (reg_t)retreg;
    p->p_seg.p_kern_trap_style = 
              (int)p_kern_trap_style;
@@ -737,4 +749,11 @@ void restore_for_stepping_first_run(struct proc *p){
    p->p_cpu_time_left = 
         ms_2_cpu_time(p->p_quantum_size_ms);
    /* be sure the process remain runnable*/
+}
+
+void abort_pe(struct proc *p){
+    vm_reset_pram(p,(u32_t *)p->p_seg.p_cr3,
+                 ABORT_PE);
+    restore_copy_0(p);
+    reset_hardened_run(p);
 }

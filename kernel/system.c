@@ -147,10 +147,7 @@ void kernel_call(message *m_user, struct proc * caller)
   caller->p_delivermsg_vir = (vir_bytes) m_user;
 
   if(h_unstable_state == H_UNSTABLE){
-       printf("ALERT ALERT FROM KERNEL CALL "
-       "!!!!! \n "
-              "The system is in unstable state"
-        " The guilty is %d\n", h_proc_nr);
+       nb_kcall++;
        return;
   }
   /*

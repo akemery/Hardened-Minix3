@@ -32,7 +32,6 @@ static void reset_vm_rusage(struct vmproc *vmp)
 
 void free_proc(struct vmproc *vmp)
 {
-       
 	map_free_proc(vmp);
 	pt_free(&vmp->vm_pt);
 	region_init(&vmp->vm_regions_avl);
@@ -47,7 +46,7 @@ void free_proc(struct vmproc *vmp)
 
 void clear_proc(struct vmproc *vmp)
 {
-         /*** Added by EKA ***/
+        /*** Added by EKA ***/
         if(vmp->vm_hflags & VM_PROC_TO_HARD)
           free_pram_mem_blocks(vmp);
         /*** End Added by EKA ***/
@@ -140,6 +139,7 @@ int do_procctl(message *msg, int transid)
 			if(msg->m_source != RS_PROC_NR
 				&& msg->m_source != VFS_PROC_NR)
 				return EPERM;
+                        
 			free_proc(vmp);
 			if(pt_new(&vmp->vm_pt) != OK)
 				panic("VMPPARAM_CLEAR: pt_new failed");

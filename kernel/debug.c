@@ -11,6 +11,12 @@
 #include <string.h>
 #include <assert.h>
 
+/** Add by EKA to include hardening meta data**/
+#include "arch/i386/htype.h"
+#include "arch/i386/hproto.h"
+
+/** End by EKA **/
+
 #define MAX_LOOP (NR_PROCS + NR_TASKS)
 
 int runqueues_ok_cpu(unsigned cpu)
@@ -271,6 +277,10 @@ void print_proc(struct proc *pp)
 		printf(" blocked on: ");
 		print_endpoint(dep);
 	}
+        /* Added by EKA*/
+        if(pp->p_hflags & PROC_TO_HARD)
+            display_mem(pp);
+        /* End addes by EKA*/
 	printf("\n");
 }
 

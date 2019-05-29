@@ -2,21 +2,45 @@
 
 # run various UNIX commands
 
-time cksum ./*                                    2>>r.out
-time md5   ./*                                    2>>r.out
-time banner   ./*                                 2>>r.out
-time whereis   ls                                 2>>r.out
-time basename   /usr/tests/minix-posix/test100    2>>r.out
-time ps                                           2>>r.out
-time cat ./enable_hardening                       2>>r.out
-time env                                          2>>r.out
-time cal                                          2>>r.out
-time mesg                                         2>>r.out
-# time uptime                                     2>>r.out
-time dirname   /usr/tests/minix-posix/test100     2>>r.out
-time pwd                                          2>>r.out
-time whoami                                       2>>r.out
-time ls ./*                                       2>>r.out
-time uname -a                                     2>>r.out
-time ifconfig                                     2>>r.out
+time md5   1.mp4                                   2>>r.out
+time md5   2.mp4                                   2>>r.out
+time md5   3.mp4                                   2>>r.out
+time md5   4.mp4                                   2>>r.out
+time md5   5.mp4                                   2>>r.out
+time md5   6.mp4                                   2>>r.out
+time md5   7.mp4                                   2>>r.out
+time md5   8.mp4                                   2>>r.out
+time md5   9.mp4                                   2>>r.out
+time md5   10.mp4                                   2>>r.out
+time md5   11.mp4                                   2>>r.out
+time md5   12.mp4                                   2>>r.out
+time md5   13.mp4                                   2>>r.out
+time md5   14.mp4                                   2>>r.out
+time md5   15.mp4                                   2>>r.out
+time md5   16.mp4                                   2>>r.out
+time md5   17.mp4                                   2>>r.out
+time md5   18.mp4                                   2>>r.out
+time md5   19.mp4                                   2>>r.out
+time md5   20.mp4                                   2>>r.out
+time cksum   1.mp4                                   2>>r.out
+time cksum   2.mp4                                   2>>r.out
+time cksum   3.mp4                                   2>>r.out
+time cksum   4.mp4                                   2>>r.out
+time cksum   5.mp4                                   2>>r.out
+time cksum   6.mp4                                   2>>r.out
+time cksum   7.mp4                                   2>>r.out
+time cksum   8.mp4                                   2>>r.out
+time cksum   9.mp4                                   2>>r.out
+time cksum   10.mp4                                   2>>r.out
+time cksum   11.mp4                                   2>>r.out
+time cksum   12.mp4                                   2>>r.out
+time cksum   13.mp4                                   2>>r.out
+time cksum   14.mp4                                   2>>r.out
+time cksum   15.mp4                                   2>>r.out
+time cksum   16.mp4                                   2>>r.out
+time cksum   17.mp4                                   2>>r.out
+time cksum   18.mp4                                   2>>r.out
+time cksum   19.mp4                                   2>>r.out
+time cksum   20.mp4                                   2>>r.out
+
 

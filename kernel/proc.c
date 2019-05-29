@@ -48,7 +48,6 @@
 
 /** Hardening process picker **/
 static struct proc * hpick_proc(void);
-static void print_ipc(struct proc *p);
 /* Scheduling and message passing functions */
 static void idle(void);
 /**
@@ -67,8 +66,6 @@ static int try_one(endpoint_t receive_e, struct proc *src_ptr,
 	struct proc *dst_ptr);
 static struct proc * pick_proc(void);
 static void enqueue_head(struct proc *rp);
-
-static void print_rdyqueue(void);
 
 /* all idles share the same idle_priv structure */
 static struct priv idle_priv;
@@ -649,10 +646,7 @@ int do_ipc(reg_t r1, reg_t r2, reg_t r3)
 #if H_DEBUG
       /** The system is an unstable 
        ** state do not handle the IPC**/
-      printf("ALERT ALERT FROM DO IPC !!!!! \n"
-              "The system is in unstable state "
-               "The guilty is %d %d %d\n", 
-             h_proc_nr, call_nr, caller_ptr->p_nr );
+      nb_scall++;
 #endif
       return(OK);
   }
@@ -1852,55 +1846,7 @@ void dequeue(struct proc *rp)
 /*===========================================================================*
  *				pick_proc				     * 
  *===========================================================================*/
-static void print_ipc(struct proc *p){
-     struct proc *q =  p->p_caller_q;
-     printf("### Queue of %s\n", p->p_name);
-     while(q){
-        printf("@@@@@@ proc: %s %d %d  sendto %d getfrom %d\n",
-          q->p_name, q->p_nr, q->p_rts_flags, q->p_sendto_e, q->p_getfrom_e);
-        q = q->p_q_link;
-     }
-}
-static void print_rdyqueue(void){
-  int q,i;
-  register struct proc *rp;			
-  struct proc **rdy_head;
-  rdy_head = get_cpulocal_var(run_q_head);
-  printf("#### PRINTING READY QUEUE ######\n\n");
-  for (q=0; q < NR_SCHED_QUEUES; q++) { 
-     if(!(rp = rdy_head[q])) 
-       continue; 
-     printf("h_enable %d queue %d proc %d name %s hproc %d\n"
-                     ,h_enable, q, rp->p_nr, rp->p_name, h_proc_nr);
-  }
-  for(i=0; i<10; i++){
-     if(hc_proc_nr[i]){
-           if(proc_addr(hc_proc_nr[i])->p_rts_flags == 1) continue;
-           printf("@@@@@@ hproc: %s %d %d  sendto %d getfrom %d vm %d vfs %d pm %d"
-                   "vm_sendto %d vmgetfrom %d pmsento %d pmgetfrom %d"
-                   "vfssento %d vfsgetfrom %d %d\n", 
-              proc_addr(hc_proc_nr[i])->p_name, proc_addr(hc_proc_nr[i])->p_nr, 
-              proc_addr(hc_proc_nr[i])->p_rts_flags,
-              proc_addr(hc_proc_nr[i])->p_sendto_e,
-              proc_addr(hc_proc_nr[i])->p_getfrom_e,
-              proc_addr(VM_PROC_NR)->p_rts_flags,
-              proc_addr(VFS_PROC_NR)->p_rts_flags,
-              proc_addr(PM_PROC_NR)->p_rts_flags,
-              proc_addr(VM_PROC_NR)->p_sendto_e,
-              proc_addr(VM_PROC_NR)->p_getfrom_e,
-              proc_addr(PM_PROC_NR)->p_sendto_e,
-              proc_addr(PM_PROC_NR)->p_getfrom_e,
-              proc_addr(VFS_PROC_NR)->p_sendto_e,
-              proc_addr(VFS_PROC_NR)->p_getfrom_e,i);
-              print_ipc(proc_addr(hc_proc_nr[i]));
-              print_ipc(proc_addr(VM_PROC_NR));
-              print_ipc(proc_addr(PM_PROC_NR));
-              print_ipc(proc_addr(VFS_PROC_NR));
-         
-      }
-  }
-  return;
-}
+
 static struct proc * pick_proc(void)
 {
 /* Decide who to run now.  A new process is selected and returned.
@@ -1931,10 +1877,6 @@ static struct proc * pick_proc(void)
 	assert(proc_is_runnable(rp));
 	if (priv(rp)->s_flags & BILLABLE)	 	
 		get_cpulocal_var(bill_ptr) = rp; /* bill for system time */
-#if H_DEBUG
-        if(0 && h_can_start_hardening)
-            print_rdyqueue();
-#endif
 	return rp;
   }
   return NULL;
@@ -2023,12 +1965,13 @@ void proc_no_time(struct proc * p)
         /** Hardening is enable and the hardened proc has NO_QUANTUM
          ** avoid sending message to SCHED**/
 
-        if(h_enable && (p->p_hflags & PROC_TO_HARD) && (p->p_nr == h_proc_nr)){
+        /*if(h_enable && (p->p_hflags & PROC_TO_HARD) && (p->p_nr == h_proc_nr)){
                p->p_cpu_time_left = ms_2_cpu_time(p->p_quantum_size_ms);
                return;
               
         }  
-	else if (!proc_kernel_scheduler(p) && priv(p)->s_flags & PREEMPTIBLE) {
+	else*/ 
+        if (!proc_kernel_scheduler(p) && priv(p)->s_flags & PREEMPTIBLE) {
 		/* this dequeues the process */
 #if 0
                 if(p->p_hflags & PROC_TO_HARD){
@@ -2164,6 +2107,8 @@ static struct proc * hpick_proc(void){
                     (h_step_back == SECOND_RUN));
                h_step = h_step_back;
                h_step_back = 0;  
+               if (priv(hp)->s_flags & BILLABLE)	 	
+		get_cpulocal_var(bill_ptr) = hp;
                return hp;
             }
             else
@@ -2177,35 +2122,57 @@ static struct proc * hpick_proc(void){
            ** We choose to give him quantum**/
            if(RTS_ISSET(hp, RTS_NO_QUANTUM)) {
               /** give more CPU time**/
+#if GIVE_QUANTUM
               hp->p_cpu_time_left = ms_2_cpu_time(hp->p_quantum_size_ms);
               RTS_UNSET(hp, RTS_NO_QUANTUM);
               printf ("Hardened process has no quantum "
                          "enable 2 %d %d\n", h_proc_nr, h_step);
-              if(proc_is_runnable(hp)) return(hp);
+              if(proc_is_runnable(hp)){
+                     if (priv(hp)->s_flags & BILLABLE)	 	
+		       get_cpulocal_var(bill_ptr) = hp; 
+                     return(hp);
+              }
               /** We give it quantum but the process is not runnable
                ** panic, should never happen **/
               if(proc_is_preempted(hp)){
                  RTS_UNSET(hp, RTS_PREEMPTED);
-                 if(proc_is_runnable(hp)) return(hp);
+                 if(proc_is_runnable(hp)){
+                    if (priv(hp)->s_flags & BILLABLE)	 	
+		        get_cpulocal_var(bill_ptr) = hp;
+                    return(hp);
+                 }
               } 
-             
-              panic ("Hardened process is not runnable during hardening "
-                         "enable 2");
+            panic ("Hardened process is not runnable during hardening "
+                         "enable 2"); 
+#else       
+#if H_DEBUG
+            printf ("Hardened process has no quantum "
+                         "aborting PE %d %d\n", h_proc_nr, h_step);  
+#endif   
+            abort_pe(hp);
+            return(NULL);  
+#endif
                         
            }
-           if(hp->p_rts_flags & RTS_INS_COUNTER){
+
+            if(hp->p_rts_flags & RTS_INS_COUNTER){
                RTS_UNSET(hp,RTS_INS_COUNTER);
-               if(proc_is_runnable(hp)) return(hp);
+               if(proc_is_runnable(hp)){
+                    if (priv(hp)->s_flags & BILLABLE)	 	
+		        get_cpulocal_var(bill_ptr) = hp;
+                    return(hp);
+               }
                /** We UNSET RTS_INS_COUNTER but the process is not runnable
                 ** panic, should never happen **/
                else 
                  panic ("Hardened process is not runnable during hardening "
                          "enable 3");             
+           }
+           if(proc_is_runnable(hp)) {
+               if (priv(hp)->s_flags & BILLABLE)	 	
+		 get_cpulocal_var(bill_ptr) = hp;
+               return(hp);
           }
-
-          if(proc_is_runnable(hp)) return(hp);
-               /** We UNSET RTS_INS_COUNTER but the process is not runnable
-                ** panic, should never happen **/
           else 
              panic ("Hardened process is not runnable during hardening "
                          "enable 4");    

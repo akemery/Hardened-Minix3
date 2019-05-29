@@ -270,3 +270,5 @@ void do_hardening(message *m);
 /*us1us2h.c*/
 int tell_kernel_for_us1_us2(struct vmproc *vmp, 
      vir_bytes v, phys_bytes physaddr, size_t bytes );
+/*vmpram.c*/
+void allocate_all_us1_us2_for_proc(struct vmproc *vmp);

@@ -40,6 +40,8 @@ int add_region_to_ws(struct proc *p, u32_t *root, vir_bytes r_base_addr,
                      int length, phys_bytes us1, phys_bytes us2);
 int set_pe_mem_to_ro(struct proc *p, u32_t *root);
 void free_pram_mem_block_vaddr(struct proc *current_p, vir_bytes raddr, int len);
+void display_hardened_proc(void);
+void reset_hardening_attri(struct proc *p);
 
 /**rcounter.c**/
 int irh(void);
@@ -80,6 +82,7 @@ int look_up_page_in_hsr(struct proc *rp,
            vir_bytes vaddr);
 void save_context(struct proc *p);
 void restore_for_stepping_first_run(struct proc *p);
+void abort_pe(struct proc *p);
 /*pram.c*/
 int check_vaddr_2(struct proc *p, u32_t *root, vir_bytes vaddr, int *rw);
 struct pram_mem_block *  look_up_pte(struct proc *current_p,

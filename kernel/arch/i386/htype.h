@@ -69,7 +69,7 @@ struct hardening_shared_region{
 
 #define MAP_NONE	0xFFFFFFFE
 #define WORKING_SET_SIZE      32768
-#define HARDENING_MEM_EVENTS    100 
+#define HARDENING_MEM_EVENTS  10000 
 #define HARDENING_SHARED_REGIONS 50
 #define HARDENING_SHARED_PROCS  100
 #define H_DISABLE              0
@@ -125,6 +125,7 @@ struct hardening_shared_region{
 #define CPY_RAM_PRAM         0x2
 #define CMP_FAILED           0x3
 #define CPY_RAM_FIRST_STEPPING 0x8
+#define ABORT_PE            0x10
 #define PROC_TO_HARD         0x2
 #define PROC_SHARING_MEM     0x4
 #define SHARED_ADDR   0xf100205c

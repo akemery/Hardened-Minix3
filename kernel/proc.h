@@ -154,6 +154,7 @@ struct proc {
   struct hardening_shared_region *p_hardening_shared_regions;
   int p_nb_hardening_shared_regions;
   int p_setcow;
+  int p_ticks;
 
 #if DEBUG_TRACE
   int p_schedules;

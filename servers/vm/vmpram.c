@@ -27,6 +27,7 @@
 #include "region.h"
 static void free_pram_mem_block(
      struct vmproc *current_p, vir_bytes vaddr);
+static void alloc_region_us1_us2(struct vmproc *vmp, struct vir_region *vr);
 
 int tell_kernel_for_us1_us2(struct vmproc *vmp, 
      vir_bytes v, phys_bytes physaddr, size_t bytes )
@@ -251,4 +252,39 @@ void free_pram_mem_blocks(struct vmproc *current_p){
      }
      assert(current_p->vm_lus1_us2_size == 0);
      assert(current_p->vm_lus1_us2 == NULL);	
+}
+
+/*===========================================================================*
+ *				allocate_all_us1_us2_for_proc		     *
+ *===========================================================================*/
+void allocate_all_us1_us2_for_proc(struct vmproc *vmp)
+{
+	struct vir_region *vr;
+	region_iter iter;
+
+
+	region_start_iter_least(&vmp->vm_regions_avl, &iter);
+	while((vr = region_get_iter(&iter))) {
+		alloc_region_us1_us2(vmp,vr);
+		region_incr_iter(&iter);
+	}
+}
+
+static void alloc_region_us1_us2(struct vmproc *vmp, struct vir_region *vr)
+{
+   unsigned int i;
+   struct phys_region *ph;
+   if(vr->flags & VR_WRITABLE){
+     for(i = 0; i < vr->length/VM_PAGE_SIZE; i++) {
+	if(!(ph=vr->physblocks[i])) continue;
+        if(pt_writable(vr->parent, vr->vaddr + ph->offset)){
+            tell_kernel_for_us1_us2(vmp,  vr->vaddr + ph->offset, 
+                  ph->ph->phys, VM_PAGE_SIZE );
+            printf("\t\t@ %lx (refs %d): phys 0x%lx, %s\n",
+			(vr->vaddr + ph->offset),
+			ph->ph->refcount, ph->ph->phys,
+		pt_writable(vr->parent, vr->vaddr + ph->offset) ? "W" : "R");
+        }	
+     }
+   }
 }
